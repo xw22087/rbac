@@ -25,14 +25,14 @@ public class UserParam {
     @Email(message = "Invalid username.")
     private String username;
 
-    private Integer userStatus;
-
-    private String userPhone;
-
-    private String userEmail;
-
-    private Set<Long> roleIds;
-
-    private Set<Long> orgIds;
+//    private Integer userStatus;
+//
+//    private String userPhone;
+//
+//    private String userEmail;
+//
+//    private Set<Long> roleIds;
+//
+//    private Set<Long> orgIds;
 
 }

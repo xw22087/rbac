@@ -51,7 +51,8 @@ public class ProfileController {
     public String addUserProfile(@RequestParam String playerDataJson, @RequestParam int userId) {
         //json转PlayerDataParam
         PlayerDataParam playerDataParam = JSONUtil.toBean(json, PlayerDataParam.class);
-        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/rbac", "root", "Wabbhmm3123804!")) {
+        try {
+            Connection connection = ConnectDB();
             String selectSql = "SELECT id, creation_time FROM user_profile WHERE user_id = ?";
             String insertSql = "INSERT INTO user_profile (user_id, created_time, player_data, spaceship_score, achievement_points, completed_chapters, boss_challenge_times, avatar_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
             String updateSql = "UPDATE user_profile SET update_time = ?, player_data = ?, spaceship_score = ?, achievement_points = ?, completed_chapters = ?, boss_challenge_times = ? WHERE id = ?";
@@ -60,29 +61,29 @@ public class ProfileController {
                  PreparedStatement insertStatement = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
                  PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
 
-                // Check if the record with the given userId exists
+                //检查是否存在该记录userid
                 selectStatement.setInt(1, playerDataParam.getUserId());
                 try (ResultSet resultSet = selectStatement.executeQuery()) {
                     if (resultSet.next()) {
-                        // Record exists, update it
+                        //如果存在，update
                         int id = resultSet.getInt("id");
                         updateStatement.setTimestamp(1, Timestamp.valueof(LocalDateTime.now()));
                         updateStatement.setString(2, playerDataJson);
-                        updateStatement.setString(3, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
-                        updateStatement.setString(4, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
-                        updateStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
-                        updateStatement.setString(6, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss挑战成功次数
+                        updateStatement.setInt(3, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
+                        updateStatement.setInt(4, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
+                        updateStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
+                        updateStatement.setInt(6, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss挑战成功次数
                         updateStatement.setInt(7, id);
                         updateStatement.executeUpdate();
                     } else {
-                        // Record does not exist, create a new one
+                        //如果不存在，create
                         insertStatement.setInt(1, userId);
                         insertStatement.setTimestamp(2, Timestamp.valueof(LocalDateTime.now()));//记录创建时间
                         insertStatement.setString(3, playerDataJson);
-                        insertStatement.setString(4, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
-                        insertStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
-                        insertStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
-                        insertStatement.setString(7, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss
+                        insertStatement.setInt(4, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
+                        insertStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
+                        insertStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
+                        insertStatement.setInt(7, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss
                         insertStatement.setString(8, JSONUtil.toJsonStr(playerDataParam.getAvatarImageUrl()));//头像
                         insertStatement.executeUpdate();
                     }
@@ -90,9 +91,9 @@ public class ProfileController {
                     statement.executeUpdate();
                 }
             } catch (SQLException e) {
-                // 处理异常
                 e.printStackTrace();
             }
+            connection.close();
             return ACTION_SUCCESSFUL
         }
 
@@ -108,13 +109,13 @@ public class ProfileController {
 //    }
 
     }
-    public char getPlayerSaving(int user_id) {
+    @PostMapping("/getSave")
+    @ApiOperation(value = "Get user's profile")
+    public char getPlayerSaving(@RequestParam int user_id) {
         char playerData = 0;
-
         try {
-            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/rbac", "root", "Wabbhmm3123804!");
-
-            // 查询语句
+            Connection connection = ConnectDB();
+            //查询语句
             String sql = "SELECT player_data FROM user_profile WHERE user_id = ?";
 
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
@@ -123,11 +124,11 @@ public class ProfileController {
             ResultSet resultSet = preparedStatement.executeQuery();
 
             if (resultSet.next()) {
-                // 获取player_data
+                //获取playerdata
                 playerData = resultSet.getString("player_data").charAt(0);
             }
 
-            // 关闭
+            //关闭
             resultSet.close();
             preparedStatement.close();
             connection.close();
@@ -138,13 +139,61 @@ public class ProfileController {
         return playerData;
     }
 
-    public List<List<char>> RankByScore() {
-        return null;
+    public Connection ConnectDB(){
+        private static final String DB_URL = "jdbc:mysql://localhost:3306/rbac";
+        private static final String DB_USER = "root";
+        private static final String DB_PASSWORD = "Wabbhmm3123804!";
+
+        return Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
     }
-    public List<List<char>> RankByPoint() {
-        return null;
-    }
-    public List<List<char>> RankByChapter() {
-        return null;
+
+    @PostMapping("/getRank")
+    @ApiOperation(value = "Get rank list")
+    //RankMode: 0=score;1=achievement;2=chapter;
+    public List<List<Object>> GetRank(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam int rankMode) {
+        char orderBy = 0;
+        switch (rankMode) {
+            case 0: orderBy = "spaceship_score";
+            case 1: orderBy = "achievement_points";
+            case 2: orderBy = "completed_chapters";
+        }
+        try {
+            // 连接数据库
+            Connection connection = ConnectDB();
+
+            // 构造SQL查询语句，按spaceship_score排序并获取指定排名范围的数据
+            String sql = "SELECT user_id, updated_time, spaceship_score " +
+                    "FROM user_profile " +
+                    "ORDER BY ? DESC " +
+                    "LIMIT ?, ?";
+
+            // 创建预处理语句并设置参数
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            preparedStatement.setString(1, orderBy);
+            preparedStatement.setInt(2, (pageNumber - 1) * pageSize);
+            preparedStatement.setInt(3, pageSize);
+
+            // 执行查询
+            ResultSet resultSet = preparedStatement.executeQuery();
+
+            // 处理查询结果
+            while (resultSet.next()) {
+                List<Object> rowData = new ArrayList<>();
+                rowData.add(resultSet.getInt("user_id"));
+                rowData.add(resultSet.getTimestamp("updated_time"));
+                rowData.add(resultSet.getInt(orderBy));
+                result.add(rowData);
+            }
+
+            // 关闭资源
+            resultSet.close();
+            preparedStatement.close();
+            connection.close();
+        } catch (SQLException e) {
+            // 处理数据库连接或查询异常
+            e.printStackTrace();
+        }
+
+        return result;
     }
 }

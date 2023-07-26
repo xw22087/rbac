@@ -20,6 +20,7 @@ public class PlayerDataParam {
     private List<Integer> playerChapters;
     // 完成战斗数量
     private int battleVictoryCount;
+    // 头像路径
     private char avatarImageUrl;
 
     // Getters
