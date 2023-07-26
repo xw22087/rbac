@@ -32,6 +32,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.Set;
+import java.time.LocalDateTime;
 
 import static com.imyuanxiao.rbac.util.CommonConst.ACTION_SUCCESSFUL;
 
@@ -168,6 +169,65 @@ public class UserController {
         return userService.getLoginHistoryByConditions(param);
     }
 
+    @PostMapping("/addUserProfile")
+    @ApiOperation(value = "Add user's profile")
+    public String addUserProfile(@RequestParam String playerDataJson, @RequestParam int userId){
+        //json转PlayerDataParam
+        PlayerDataParam playerDataParam = JSONUtil.toBean(json, PlayerDataParam.class);
+        try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/rbac", "root", "Wabbhmm3123804!")) {
+            String selectSql = "SELECT id, creation_time FROM user_profile WHERE user_id = ?";
+            String insertSql = "INSERT INTO user_profile (user_id, created_time, player_data, spaceship_score, achievement_points, completed_chapters, boss_challenge_times, avatar_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String updateSql = "UPDATE user_profile SET update_time = ?, player_data = ?, spaceship_score = ?, achievement_points = ?, completed_chapters = ?, boss_challenge_times = ? WHERE id = ?";
 
+            try (PreparedStatement selectStatement = connection.prepareStatement(selectSql);
+                 PreparedStatement insertStatement = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
+                 PreparedStatement updateStatement = connection.prepareStatement(updateSql)) {
+
+                // Check if the record with the given userId exists
+                selectStatement.setInt(1, playerDataParam.getUserId());
+                try (ResultSet resultSet = selectStatement.executeQuery()) {
+                    if (resultSet.next()) {
+                        // Record exists, update it
+                        int id = resultSet.getInt("id");
+                        updateStatement.setTimestamp(1, Timestamp.valueof(LocalDateTime.now()));
+                        updateStatement.setString(2, playerDataJson);
+                        updateStatement.setString(3, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
+                        updateStatement.setString(4, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
+                        updateStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
+                        updateStatement.setString(6, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss挑战成功次数
+                        updateStatement.setInt(7, id);
+                        updateStatement.executeUpdate();
+                    } else {
+                        // Record does not exist, create a new one
+                        insertStatement.setInt(1, userId);
+                        insertStatement.setTimestamp(2, Timestamp.valueof(LocalDateTime.now()));//记录创建时间
+                        insertStatement.setString(3, playerDataJson);
+                        insertStatement.setString(4, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
+                        insertStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
+                        insertStatement.setString(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
+                        insertStatement.setString(7, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss
+                        insertStatement.setString(8, JSONUtil.toJsonStr(playerDataParam.getAvatarImageUrl()));//头像
+                        insertStatement.executeUpdate();
+                    }
+
+                statement.executeUpdate();
+            }
+        } catch (SQLException e) {
+            // 处理异常
+            e.printStackTrace();
+        }
+        return ACTION_SUCCESSFUL
+    }
+
+    //将PlayerDataParam对象转换为JSON字符串
+//    private String convertPlayerDataToJson(PlayerDataParam playerDataParam) {
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        try {
+//            return objectMapper.writeValueAsString(playerDataParam);
+//        } catch (JsonProcessingException e) {
+//            e.printStackTrace();
+//            return null;
+//        }
+//    }
 
 }
