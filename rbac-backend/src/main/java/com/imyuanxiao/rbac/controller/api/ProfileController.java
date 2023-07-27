@@ -54,8 +54,10 @@ public class ProfileController {
         try {
             Connection connection = ConnectDB();
             String selectSql = "SELECT id, creation_time FROM user_profile WHERE user_id = ?";
-            String insertSql = "INSERT INTO user_profile (user_id, created_time, player_data, spaceship_score, achievement_points, completed_chapters, boss_challenge_times, avatar_image) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            String updateSql = "UPDATE user_profile SET update_time = ?, player_data = ?, spaceship_score = ?, achievement_points = ?, completed_chapters = ?, boss_challenge_times = ? WHERE id = ?";
+            String insertSql = "INSERT INTO user_profile (user_id, created_time, updated_time, player_data, spaceship_score, achievement_points, completed_chapters," +
+                    " boss1100_time, boss1101_time, boss1102_time, boss1103_time, boss1104_time, boss1105_time, boss1106_time, avatar_imageId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+            String updateSql = "UPDATE user_profile SET updated_time = ?, player_data = ?, spaceship_score = ?, achievement_points = ?, completed_chapters = ?," +
+                    " boss1100_time = ?, boss1101_time = ?, boss1102_time = ?, boss1103_time = ?, boss1104_time = ?, boss1105_time = ?, boss1106_time = ? WHERE user_id = ?";
 
             try (PreparedStatement selectStatement = connection.prepareStatement(selectSql);
                  PreparedStatement insertStatement = connection.prepareStatement(insertSql, Statement.RETURN_GENERATED_KEYS);
@@ -66,25 +68,43 @@ public class ProfileController {
                 try (ResultSet resultSet = selectStatement.executeQuery()) {
                     if (resultSet.next()) {
                         //如果存在，update
-                        int id = resultSet.getInt("id");
+                        int user_id = resultSet.getInt("user_id");
                         updateStatement.setTimestamp(1, Timestamp.valueof(LocalDateTime.now()));
                         updateStatement.setString(2, playerDataJson);
-                        updateStatement.setInt(3, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
-                        updateStatement.setInt(4, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
-                        updateStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
-                        updateStatement.setInt(6, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss挑战成功次数
-                        updateStatement.setInt(7, id);
+                        updateStatement.setInt(3, playerDataParam.getSpaceshipScore());//飞船评分
+                        updateStatement.setInt(4, playerDataParam.getAchievementPoint());//成就点数
+                        updateStatement.setInt(5, playerDataParam.getPlayerChapterNum());//完成章节数
+                        //boss time
+                        updateStatement.setString(6, JSONUtil.toJsonStr(playerDataParam.getBossTime1100()));
+                        updateStatement.setString(7, JSONUtil.toJsonStr(playerDataParam.getBossTime1101()));
+                        updateStatement.setString(8, JSONUtil.toJsonStr(playerDataParam.getBossTime1102()));
+                        updateStatement.setString(9, JSONUtil.toJsonStr(playerDataParam.getBossTime1103()));
+                        updateStatement.setString(10, JSONUtil.toJsonStr(playerDataParam.getBossTime1104()));
+                        updateStatement.setString(11, JSONUtil.toJsonStr(playerDataParam.getBossTime1105()));
+                        updateStatement.setString(12, JSONUtil.toJsonStr(playerDataParam.getBossTime1106()));
+                        //user to be updated
+                        updateStatement.setInt(13, user_id);
                         updateStatement.executeUpdate();
                     } else {
                         //如果不存在，create
-                        insertStatement.setInt(1, userId);
+                        insertStatement.setInt(1, playerDataParam.getUserId);
                         insertStatement.setTimestamp(2, Timestamp.valueof(LocalDateTime.now()));//记录创建时间
-                        insertStatement.setString(3, playerDataJson);
-                        insertStatement.setInt(4, JSONUtil.toJsonStr(playerDataParam.getSpaceshipScore()));//飞船评分
-                        insertStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getAchievementPoint()));//成就点数
-                        insertStatement.setInt(5, JSONUtil.toJsonStr(playerDataParam.getPlayerChapterNum()));//完成章节数
-                        insertStatement.setInt(7, JSONUtil.toJsonStr(playerDataParam.getBattleVictoryCount()));//boss
-                        insertStatement.setString(8, JSONUtil.toJsonStr(playerDataParam.getAvatarImageUrl()));//头像
+                        insertStatement.setTimestamp(3, Timestamp.valueof(LocalDateTime.now()));//记录更新时间
+
+                        insertStatement.setString(4, playerDataJson);
+                        insertStatement.setInt(5, playerDataParam.getSpaceshipScore()));//飞船评分
+                        insertStatement.setInt(6, playerDataParam.getAchievementPoint());//成就点数
+                        insertStatement.setInt(7, playerDataParam.getPlayerChapterNum());//完成章节数
+                        //boss
+                        insertStatement.setString(8, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1100()));
+                        insertStatement.setString(9, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1101()));
+                        insertStatement.setString(10, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1102()));
+                        insertStatement.setString(11, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1103()));
+                        insertStatement.setString(12, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1104()));
+                        insertStatement.setString(13, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1105()));
+                        insertStatement.setString(14, JSONUtil.toJsonStr(playerDataParam.playerDataParam.getBossTime1106()));
+                        //头像
+                        insertStatement.setInt(15, playerDataParam.getAvatarImageId());
                         insertStatement.executeUpdate();
                     }
 
@@ -156,22 +176,31 @@ public class ProfileController {
             case 0: orderBy = "spaceship_score";
             case 1: orderBy = "achievement_points";
             case 2: orderBy = "completed_chapters";
+            case 3: orderBy = "boss1100_time";
+            case 4: orderBy = "boss1101_time";
+            case 5: orderBy = "boss1102_time";
+            case 6: orderBy = "boss1103_time";
+            case 7: orderBy = "boss1104_time";
+            case 8: orderBy = "boss1105_time";
+            case 9: orderBy = "boss1106_time";
         }
         try {
             // 连接数据库
             Connection connection = ConnectDB();
 
-            // 构造SQL查询语句，按spaceship_score排序并获取指定排名范围的数据
-            String sql = "SELECT user_id, updated_time, spaceship_score " +
-                    "FROM user_profile " +
-                    "ORDER BY ? DESC " +
+            // 构造SQL查询语句，按评分需要的数据排序并获取指定排名范围的数据
+            String sql = "SELECT u.user_name, up.? " +
+                    "FROM user u " +
+                    "JOIN user_profile up ON u.user_id = up.user_id " +
+                    "ORDER BY up.? DESC " +
                     "LIMIT ?, ?";
 
-            // 创建预处理语句并设置参数
+            // 预处理语句与参数
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             preparedStatement.setString(1, orderBy);
-            preparedStatement.setInt(2, (pageNumber - 1) * pageSize);
-            preparedStatement.setInt(3, pageSize);
+            preparedStatement.setString(2, orderBy);
+            preparedStatement.setInt(3, (pageNumber - 1) * pageSize);
+            preparedStatement.setInt(4, pageNumber * pageSize);
 
             // 执行查询
             ResultSet resultSet = preparedStatement.executeQuery();
@@ -179,18 +208,17 @@ public class ProfileController {
             // 处理查询结果
             while (resultSet.next()) {
                 List<Object> rowData = new ArrayList<>();
-                rowData.add(resultSet.getInt("user_id"));
-                rowData.add(resultSet.getTimestamp("updated_time"));
+                rowData.add(resultSet.getInt("user_name"));
                 rowData.add(resultSet.getInt(orderBy));
                 result.add(rowData);
             }
 
-            // 关闭资源
+            // 关闭
             resultSet.close();
             preparedStatement.close();
             connection.close();
+
         } catch (SQLException e) {
-            // 处理数据库连接或查询异常
             e.printStackTrace();
         }
 
