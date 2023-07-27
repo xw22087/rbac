@@ -37,13 +37,13 @@ import java.time.LocalDateTime;
 import static com.imyuanxiao.rbac.util.CommonConst.ACTION_SUCCESSFUL;
 
 /**
- * @description  User Profile Saving
+ * @description  User Profile Management
  * @author: <a href="https://github.com/imyuanxiao">imyuanxiao</a>
  **/
 @Slf4j
 @RestController
-@RequestMapping("/save")
-@Api(tags = "User Profile Saving")
+@RequestMapping("/profile")
+@Api(tags = "User Profile Management")
 public class ProfileController {
 
     @PostMapping("/save")
