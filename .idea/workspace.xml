@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="SELECTIVE" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="e3e7bfb7-b192-455f-b0bd-d32e5af2106e" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/controller/api/ProfileController.java" beforeDir="false" afterPath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/controller/api/ProfileController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/model/param/PlayerDataParam.java" beforeDir="false" afterPath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/model/param/PlayerDataParam.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/model/param/PlayerNPCData.java" beforeDir="false" afterPath="$PROJECT_DIR$/rbac-backend/src/main/java/com/imyuanxiao/rbac/model/param/PlayerNPCData.java" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="2T4FYpKhqniAtuTPenM0Ol1w1uo" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent"><![CDATA[{
+  "keyToString": {
+    "ASKED_SHARE_PROJECT_CONFIGURATION_FILES": "true",
+    "RunOnceActivity.OpenProjectViewOnStart": "true",
+    "RunOnceActivity.ShowReadmeOnStart": "true",
+    "WebServerToolWindowFactoryState": "false",
+    "database.data.extractors.current.export.id": "Comma-separated (CSV)_id",
+    "node.js.detected.package.eslint": "true",
+    "node.js.detected.package.tslint": "true",
+    "node.js.selected.package.eslint": "(autodetect)",
+    "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
+    "vue.rearranger.settings.migration": "true"
+  },
+  "keyToStringList": {
+    "DatabaseDriversLRU": [
+      "mysql"
+    ],
+    "RunConfigurationTargetLRU": [
+      "66f75077-86f9-4669-a6b2-edb268a42c43",
+      "afc9443b-c896-4a59-977d-53039ac6cd3b",
+      "223fefd2-d56a-42eb-bed3-a1422e50a0e1"
+    ]
+  }
+}]]></component>
+  <component name="RunManager">
+    <configuration name="rbac.sql" type="DatabaseScript" editBeforeRun="true" nameIsGenerated="true">
+      <script-file value="$PROJECT_DIR$/rbac.sql" />
+      <script-mode>FILE</script-mode>
+      <data-source id="223fefd2-d56a-42eb-bed3-a1422e50a0e1" />
+      <method v="2" />
+    </configuration>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="e3e7bfb7-b192-455f-b0bd-d32e5af2106e" name="Changes" comment="" />
+      <created>1690294495598</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1690294495598</updated>
+      <workItem from="1690294498429" duration="27023000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State />
+          </value>
+        </entry>
+      </map>
+    </option>
+  </component>
+</project>
