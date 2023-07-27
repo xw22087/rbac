@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="DataSourceManagerImpl" format="xml" multifile-model="true">
-    <data-source source="LOCAL" name="rbac" uuid="223fefd2-d56a-42eb-bed3-a1422e50a0e1">
+    <data-source source="LOCAL" name="rbac" uuid="1b556925-e6ed-4962-908c-9592d579b210">
       <driver-ref>mysql.8</driver-ref>
       <synchronize>true</synchronize>
       <jdbc-driver>com.mysql.cj.jdbc.Driver</jdbc-driver>

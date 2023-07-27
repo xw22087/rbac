@@ -109,9 +109,9 @@ TRUNCATE TABLE user_organization;
 TRUNCATE TABLE user_profile;
 TRUNCATE TABLE user_role;
 
-INSERT INTO `user` (`username`, `user_phone`, `user_email`, `user_password`, `user_status`) VALUES
-  ('admin', '13111111111', 'admin@example.com', '$2a$10$BLYxyDMlacAaAapo4D5Ar.OQ9sVhsxvvDINO0JzM9Q6Q5f7e4LUBa', 0),
-  ('user', '13222222222', 'user@example.com', '$2a$10$RPDCWuAXoYPMfZJ7bhqv4O2T8PI5Od2t.4GPIMJHTCrCa2TqOMtFi', 0);
+INSERT INTO `user` (`user_name`, `user_password`) VALUES
+  ('admin', '$2a$10$BLYxyDMlacAaAapo4D5Ar.OQ9sVhsxvvDINO0JzM9Q6Q5f7e4LUBa'),
+  ('user', '$2a$10$RPDCWuAXoYPMfZJ7bhqv4O2T8PI5Od2t.4GPIMJHTCrCa2TqOMtFi');
 
 
 INSERT INTO `role` (`role_name`, `description`) VALUES
