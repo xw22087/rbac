@@ -46,15 +46,15 @@ public class AuthController {
     * @param param phone
     * @author imyuanxiao
     */
-    @PostMapping("/captcha")
-    @ApiOperation(value = "Get Captcha")
-    public String sendCaptcha(@RequestBody CaptchaParam param){
-        String phone = param.getPhone();
-        if(!PhoneUtil.isPhone(phone)){
-            throw new ApiException(ResultCode.PARAMS_ERROR,"手机号格式错误！");
-        }
-        return userService.sendCaptcha(phone);
-    }
+//    @PostMapping("/captcha")
+//    @ApiOperation(value = "Get Captcha")
+//    public String sendCaptcha(@RequestBody CaptchaParam param){
+//        String phone = param.getPhone();
+//        if(!PhoneUtil.isPhone(phone)){
+//            throw new ApiException(ResultCode.PARAMS_ERROR,"手机号格式错误！");
+//        }
+//        return userService.sendCaptcha(phone);
+//    }
 
     /**
     * @description: register
@@ -77,13 +77,13 @@ public class AuthController {
                 String errorMessage = validate.iterator().next().getMessage();
                 throw new ApiException(ResultCode.PARAMS_ERROR, errorMessage);
             }
-        } else if (CommonConst.MOBILE.equals(type)) {
-            // 执行手机号登录的验证逻辑
-            Set<ConstraintViolation<LoginRequestParam>> validate = validator.validate(request, ValidationGroups.Mobile.class);
-            if(!validate.isEmpty()){
-                String errorMessage = validate.iterator().next().getMessage();
-                throw new ApiException(ResultCode.PARAMS_ERROR, errorMessage);
-            }
+        //} else if (CommonConst.MOBILE.equals(type)) {
+//            // 执行手机号登录的验证逻辑
+//            Set<ConstraintViolation<LoginRequestParam>> validate = validator.validate(request, ValidationGroups.Mobile.class);
+//            if(!validate.isEmpty()){
+//                String errorMessage = validate.iterator().next().getMessage();
+//                throw new ApiException(ResultCode.PARAMS_ERROR, errorMessage);
+//            }
         } else {
             throw new ApiException(ResultCode.PARAMS_ERROR);
         }

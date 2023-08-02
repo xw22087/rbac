@@ -1,6 +1,15 @@
+package com.imyuanxiao.rbac.model.param;
+
 import java.util.Map;
 import java.util.List;
+import com.imyuanxiao.rbac.util.ValidationGroups;
+import lombok.Data;
+import org.hibernate.validator.constraints.Length;
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
+import java.util.Set;
 
+@Data
 public class PlayerDataParam {
     // 飞船ID
 //    private int initialSpaceshipId;
@@ -30,7 +39,7 @@ public class PlayerDataParam {
     private int achievementPoint;
     // 章节数
     private int chapterNum;
-    // Boss1100击败时间
+//     Boss1100击败时间
     private float BossTime1100;
     // Boss1101击败时间
     private float BossTime1101;

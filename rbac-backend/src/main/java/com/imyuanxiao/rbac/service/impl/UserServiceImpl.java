@@ -239,11 +239,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         User user = new User();
         user.setUsername(param.getUsername()).setUserPassword(passwordEncoder.encode(param.getUsername()));
         save(user);
-        if (CollectionUtil.isEmpty(param.getRoleIds())) {
-            return;
-        }
-        // Add info in table [user-role]
-        roleService.insertRolesByUserId(user.getId(), param.getRoleIds());
+//        if (CollectionUtil.isEmpty(param.getRoleIds())) {
+//            return;
+//        }
+//        // Add info in table [user-role]
+//        roleService.insertRolesByUserId(user.getId(), param.getRoleIds());
     }
 
     private void checkUsername(String username) {
@@ -276,38 +276,38 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return true;
     }
 
-    @Override
-    public void updateUserProfile(UserProfileParam param) {
-
-        Long currentUserId = SecurityContextUtil.getCurrentUserId();
-
-        // 更新手机号邮箱
-        lambdaUpdate()
-                .set(StrUtil.isNotBlank(param.getUserPhone()), User::getUserPhone, param.getUserPhone())
-                .set(StrUtil.isNotBlank(param.getUserEmail()), User::getUserEmail, param.getUserEmail())
-                .eq(User::getId, currentUserId).update();
-
-        // 更新其他资料
-        UserProfile userProfile = BeanUtil.copyProperties(param, UserProfile.class);
-        userProfile.setUserId(currentUserId);
-        userProfileService.updateByUserId(userProfile);
-
-        // 更新redis内用户资料
-        User userResult = this.lambdaQuery()
-                .eq(User::getId, currentUserId)
-                .one();
-        // Put user basic info, profile, token, permissions in UserVO object
-        UserVO userVO = getUserVO(userResult);
-        // save UserMap to redis
-        // Manually handle or use util to convert id 'long' to 'string'.
-        Map<String, Object> userMap = BeanUtil.beanToMap(userVO, new HashMap<>(),
-                CopyOptions.create().
-                        setIgnoreNullValue(true)
-                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue != null ? fieldValue.toString() : null));
-        // Save user info and token in redis
-        redisUtil.saveUserMap(userMap);
-
-    }
+//    @Override
+//    public void updateUserProfile(UserProfileParam param) {
+//
+//        Long currentUserId = SecurityContextUtil.getCurrentUserId();
+//
+//        // 更新手机号邮箱
+//        lambdaUpdate()
+//                .set(StrUtil.isNotBlank(param.getUserPhone()), User::getUserPhone, param.getUserPhone())
+//                .set(StrUtil.isNotBlank(param.getUserEmail()), User::getUserEmail, param.getUserEmail())
+//                .eq(User::getId, currentUserId).update();
+//
+//        // 更新其他资料
+//        UserProfile userProfile = BeanUtil.copyProperties(param, UserProfile.class);
+//        userProfile.setUserId(currentUserId);
+//        userProfileService.updateByUserId(userProfile);
+//
+//        // 更新redis内用户资料
+//        User userResult = this.lambdaQuery()
+//                .eq(User::getId, currentUserId)
+//                .one();
+//        // Put user basic info, profile, token, permissions in UserVO object
+//        UserVO userVO = getUserVO(userResult);
+//        // save UserMap to redis
+//        // Manually handle or use util to convert id 'long' to 'string'.
+//        Map<String, Object> userMap = BeanUtil.beanToMap(userVO, new HashMap<>(),
+//                CopyOptions.create().
+//                        setIgnoreNullValue(true)
+//                        .setFieldValueEditor((fieldName, fieldValue) -> fieldValue != null ? fieldValue.toString() : null));
+//        // Save user info and token in redis
+//        redisUtil.saveUserMap(userMap);
+//
+//    }
 
     @Override
     public void updateUserPassword(UserPasswordParam param) {
@@ -347,42 +347,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         lambdaUpdate().eq(User::getId, updateUser.getId()).update(updateUser);
 
         // 更新角色
-        updateRoles(param);
+//        updateRoles(param);
 
         // 更新组织
-        updateOrgs(param);
+//        updateOrgs(param);
     }
 
-    private void updateOrgs(UserParam param) {
-        // Delete the original user role
-        organizationService.removeByUserId(param.getId());
-        // If roleIds is empty, delete all roles for this user
-        if (CollectionUtil.isEmpty(param.getOrgIds())) {
-            return;
-        }
-        // If orgIds not empty, add new roles for this user
-        organizationService.insertOrgsByUserId(param.getId(), param.getOrgIds());
-    }
+//    private void updateOrgs(UserParam param) {
+//        // Delete the original user role
+//        organizationService.removeByUserId(param.getId());
+//        // If roleIds is empty, delete all roles for this user
+//        if (CollectionUtil.isEmpty(param.getOrgIds())) {
+//            return;
+//        }
+//        // If orgIds not empty, add new roles for this user
+//        organizationService.insertOrgsByUserId(param.getId(), param.getOrgIds());
+//    }
 
-    private void updateRoles(UserParam param) {
-        // Delete the original user role
-        roleService.removeByUserId(param.getId());
-        // If roleIds is empty, delete all roles for this user
-        if (CollectionUtil.isEmpty(param.getRoleIds())) {
-            return;
-        }
-        // If roleIds not empty, add new roles for this user
-        roleService.insertRolesByUserId(param.getId(), param.getRoleIds());
-    }
+//    private void updateRoles(UserParam param) {
+//        // Delete the original user role
+//        roleService.removeByUserId(param.getId());
+//        // If roleIds is empty, delete all roles for this user
+//        if (CollectionUtil.isEmpty(param.getRoleIds())) {
+//            return;
+//        }
+//        // If roleIds not empty, add new roles for this user
+//        roleService.insertRolesByUserId(param.getId(), param.getRoleIds());
+//    }
 
     @Override
     public IPage<UserPageVO> selectPageByConditions(Page<UserPageVO> page, QueryWrapper<UserPageVO> queryWrapper) {
         IPage<UserPageVO> pages = baseMapper.selectPage(page, queryWrapper);
         // Get roles and organizations for all users
-        for (UserPageVO vo : pages.getRecords()) {
-            vo.setRoleIds(roleService.getIdsByUserId(vo.getId()));
-            vo.setOrgIds(organizationService.getIdsByUserId(vo.getId()));
-        }
+//        for (UserPageVO vo : pages.getRecords()) {
+//            vo.setRoleIds(roleService.getIdsByUserId(vo.getId()));
+//            vo.setOrgIds(organizationService.getIdsByUserId(vo.getId()));
+//        }
         return pages;
     }
 

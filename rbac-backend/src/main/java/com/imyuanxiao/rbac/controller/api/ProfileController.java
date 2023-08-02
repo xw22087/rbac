@@ -2,13 +2,15 @@ package com.imyuanxiao.rbac.controller.api;
 
 import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.util.StrUtil;
-import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.baomidou.mybatisplus.core.metadata.IPage;
-import com.baomidou.mybatisplus.core.metadata.OrderItem;
-import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
-import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
-import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import cn.hutool.json.JSONObject;
+import cn.hutool.json.JSONUtil;
+//import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
+//import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+//import com.baomidou.mybatisplus.core.metadata.IPage;
+//import com.baomidou.mybatisplus.core.metadata.OrderItem;
+//import com.baomidou.mybatisplus.core.toolkit.ArrayUtils;
+//import com.baomidou.mybatisplus.extension.conditions.query.LambdaQueryChainWrapper;
+//import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 
 import com.imyuanxiao.rbac.annotation.Auth;
 import com.imyuanxiao.rbac.enums.ResultCode;
@@ -35,6 +37,17 @@ import java.util.Set;
 import java.time.LocalDateTime;
 
 import static com.imyuanxiao.rbac.util.CommonConst.ACTION_SUCCESSFUL;
+import java.sql.Connection;
+import java.util.List;
+import java.sql.DriverManager;
+
+import java.sql.PreparedStatement;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
+
+
 
 /**
  * @description  User Profile Management
@@ -45,14 +58,17 @@ import static com.imyuanxiao.rbac.util.CommonConst.ACTION_SUCCESSFUL;
 @RequestMapping("/profile")
 @Api(tags = "User Profile Management")
 public class ProfileController {
+    private static final String DB_URL = "jdbc:mysql://localhost:3306/rbac";
+    private static final String DB_USER = "root";
+    private static final String DB_PASSWORD = "Wabbhmm3123804!";
+    private Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
 
     @PostMapping("/save")
     @ApiOperation(value = "Add user's profile")
     public String addUserProfile(@RequestParam String playerDataJson, @RequestParam int userId) {
         //json转PlayerDataParam
-        PlayerDataParam playerDataParam = JSONUtil.toBean(json, PlayerDataParam.class);
-        try {
-            Connection connection = ConnectDB();
+        PlayerDataParam playerDataParam = JSONUtil.toBean(playerDataJson, PlayerDataParam.class);
+        try (connection){
             String selectSql = "SELECT id, creation_time FROM user_profile WHERE user_id = ?";
             String insertSql = "INSERT INTO user_profile (user_id, created_time, updated_time, player_data, spaceship_score, achievement_points, completed_chapters," +
                     " boss1100_time, boss1101_time, boss1102_time, boss1103_time, boss1104_time, boss1105_time, boss1106_time, avatar_imageId) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
@@ -69,7 +85,7 @@ public class ProfileController {
                     if (resultSet.next()) {
                         //如果存在，update
                         int user_id = resultSet.getInt("user_id");
-                        updateStatement.setTimestamp(1, Timestamp.valueof(LocalDateTime.now()));
+                        updateStatement.setTimestamp(1, Timestamp.valueOf(LocalDateTime.now()));
                         updateStatement.setString(2, playerDataJson);
                         updateStatement.setInt(3, playerDataParam.getSpaceshipScore());//飞船评分
                         updateStatement.setInt(4, playerDataParam.getAchievementPoint());//成就点数
@@ -92,7 +108,7 @@ public class ProfileController {
                         insertStatement.setTimestamp(3, Timestamp.valueof(LocalDateTime.now()));//记录更新时间
 
                         insertStatement.setString(4, playerDataJson);
-                        insertStatement.setInt(5, playerDataParam.getSpaceshipScore()));//飞船评分
+                        insertStatement.setInt(5, playerDataParam.getSpaceshipScore());//飞船评分
                         insertStatement.setInt(6, playerDataParam.getAchievementPoint());//成就点数
                         insertStatement.setInt(7, playerDataParam.getPlayerChapterNum());//完成章节数
                         //boss
@@ -114,7 +130,7 @@ public class ProfileController {
                 e.printStackTrace();
             }
             connection.close();
-            return ACTION_SUCCESSFUL
+            return ACTION_SUCCESSFUL;
         }
 
         //将PlayerDataParam对象转换为JSON字符串
@@ -129,12 +145,11 @@ public class ProfileController {
 //    }
 
     }
-    @PostMapping("/getSave")
+    @PostMapping("/getsave")
     @ApiOperation(value = "Get user's profile")
     public char getPlayerSaving(@RequestParam int user_id) {
         char playerData = 0;
         try {
-            Connection connection = ConnectDB();
             //查询语句
             String sql = "SELECT player_data FROM user_profile WHERE user_id = ?";
 
@@ -159,37 +174,26 @@ public class ProfileController {
         return playerData;
     }
 
-    public Connection ConnectDB(){
-        private static final String DB_URL = "jdbc:mysql://localhost:3306/rbac";
-        private static final String DB_USER = "root";
-        private static final String DB_PASSWORD = "Wabbhmm3123804!";
-
-        return Connection connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-    }
-
-    @PostMapping("/getRank")
+    @PostMapping("/getrank")
     @ApiOperation(value = "Get rank list")
     //RankMode: 0=score;1=achievement;2=chapter;
     public List<List<Object>> GetRank(@RequestParam int pageNumber, @RequestParam int pageSize, @RequestParam int rankMode) {
-        char orderBy = 0;
+        char orderBy = null;
         switch (rankMode) {
             case 0: orderBy = "spaceship_score";
             case 1: orderBy = "achievement_points";
-            case 2: orderBy = "completed_chapters";
-            case 3: orderBy = "boss1100_time";
-            case 4: orderBy = "boss1101_time";
-            case 5: orderBy = "boss1102_time";
-            case 6: orderBy = "boss1103_time";
-            case 7: orderBy = "boss1104_time";
-            case 8: orderBy = "boss1105_time";
-            case 9: orderBy = "boss1106_time";
+//            case 2: orderBy = "completed_chapters";
+            case 2: orderBy = "boss1100_time";
+            case 3: orderBy = "boss1101_time";
+            case 4: orderBy = "boss1102_time";
+            case 5: orderBy = "boss1103_time";
+            case 6: orderBy = "boss1104_time";
+            case 7: orderBy = "boss1105_time";
+            case 8: orderBy = "boss1106_time";
         }
         try {
-            // 连接数据库
-            Connection connection = ConnectDB();
-
             // 构造SQL查询语句，按评分需要的数据排序并获取指定排名范围的数据
-            String sql = "SELECT u.user_name, up.? " +
+            String sql = "SELECT u.user_name, u.user_id, up.spaceship_score, up.achievement_points " +
                     "FROM user u " +
                     "JOIN user_profile up ON u.user_id = up.user_id " +
                     "ORDER BY up.? DESC " +
@@ -208,8 +212,15 @@ public class ProfileController {
             // 处理查询结果
             while (resultSet.next()) {
                 List<Object> rowData = new ArrayList<>();
-                rowData.add(resultSet.getInt("user_name"));
-                rowData.add(resultSet.getInt(orderBy));
+                rowData.add(resultSet.getString("user_name"));
+                rowData.add(resultSet.getInt("user_id"));
+                rowData.add(resultSet.getInt("spaceship_score"));
+                rowData.add(resultSet.getInt("achievement_points"));
+                rowData.add(resultSet.getInt("completed_chapters"));
+
+                if (rankMode > 1) {
+                    rowData.add(resultSet.getFloat(orderBy));
+                }
                 result.add(rowData);
             }
 
